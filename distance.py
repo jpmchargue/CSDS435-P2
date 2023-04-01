@@ -57,7 +57,7 @@ class Parser():
         sentences = []
 
         print("Gathering vocabulary...")
-        with open(filename, 'r') as file:
+        with open(filename, 'r', encoding='utf8') as file:
             all_tweets = file.readlines()
             self.num_tweets = len(all_tweets)
             for tweet in tqdm(all_tweets):
@@ -135,7 +135,7 @@ def euclidean_distance(x, y):
   return np.linalg.norm(x - y)
 
 def manhattan_distance(x, y):
-  return np.sum(x - y)
+  return np.sum(np.abs(x - y))
 
 parser = Parser()
 parser.get_bag_of_words("cnnhealth.txt")

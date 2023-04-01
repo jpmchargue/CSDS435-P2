@@ -1,30 +1,11 @@
-import matplotlib.pyplot as plt
 import numpy as np
-import umap
-from sklearn.preprocessing import StandardScaler
 
 from single_link import SingleLink
 from average_linkage import AverageLinkage
 from kmedoids import KMedoidsClustering
 from distance import Parser, euclidean_distance
+from util import plot_umap
 
-
-def plot_umap(bow, labels):
-    color_ref = ["slategray", 'r', "orange", 'y', 'g', "aqua", 'b', "indigo", 'm', "black"]
-    colors = [color_ref[l] for l in labels]
-
-    scaled = StandardScaler().fit_transform(bow)
-    umapped = umap.UMAP().fit_transform(scaled)
-
-    print("Plotting...")
-    plt.scatter(
-        umapped[:, 0],
-        umapped[:, 1],
-        c=colors
-    )
-    plt.gca().set_aspect('equal', 'datalim')
-    plt.title('UMAP Projection')
-    plt.show()
 
 np.set_printoptions(threshold=1000000)
 parser = Parser()
