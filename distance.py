@@ -31,7 +31,7 @@ class Parser():
         words = [re.sub(r'[^a-zA-Z]', '', w) for w in words]
         return words
 
-    def get_bag_of_words(self, filename: str, save: bool=True) -> np.ndarray:
+    def get_bag_of_words(self, filename: str, save_to: str="") -> np.ndarray:
         """
         Get the bag of words matrix for a given corpus.
         Every line in the corpus is represented as a row of length num_words,
@@ -41,14 +41,14 @@ class Parser():
 
         Args:
             filename (str): the filename of the corpus
-            save (bool, optional): whether to save the resulting matrix. Defaults to True.
+            save (str, optional): what filename to save the matrix to.
 
         Returns:
-            np.ndarray: _description_
+            np.ndarray: a matrix representing a bag of words embedding of the corpus.
         """
-        if os.path.exists(filename):
+        if save_to and os.path.exists(save_to):
             print("Found previously generated matrix")
-            return np.load(filename)
+            return np.load(save_to)
 
         self.word_to_int = {}
         self.int_to_word = {}
@@ -76,12 +76,20 @@ class Parser():
             for word in sentences[i]:
                 vectors[i][self.word_to_int[word]] += 1
 
-        if save:
-            np.save("bag_of_words.npy", vectors)
+        print("Generating text file...")
+        txt_lines = [" ".join([self.int_to_word[i] for i in range(self.num_words)]) + "\n"]
+        for t in range(self.num_tweets):
+            txt_line = " ".join([str(num) for num in vectors[t]]) + "\n"
+            txt_lines.append(txt_line)
+        with open("tweet_matrix.txt", 'w') as file:
+            file.writelines(txt_lines)
+
+        if save_to:
+            np.save(save_to, vectors)
 
         return vectors
         
-    def get_distance_matrix(self, filename: str, distance_function: Callable, save: bool=True) -> np.ndarray:
+    def get_distance_matrix(self, filename: str, distance_function: Callable, save_to: str="") -> np.ndarray:
         """
         Generate the distance matrix for the lines in a corpus.
 
@@ -89,16 +97,16 @@ class Parser():
             filename (str): the name of the corpus to analyze
             distance_function (Callable): the function to be used as a distance function.
                 This function should take two np.ndarray arguments of equal size and return a number.
-            save (bool, optional): whether to save the resulting matrix. Defaults to True.
+            save (bool, optional): the filename to save the matrix to.
 
         Returns:
             np.ndarray: the distance matrix for the lines in the corpus.
         """
-        if os.path.exists(filename):
+        if save_to and os.path.exists(save_to):
             print("Found previously generated matrix")
-            return np.load(filename)
+            return np.load(save_to)
 
-        bag_of_words = self.get_bag_of_words(filename, save)
+        bag_of_words = self.get_bag_of_words(filename, None)
         distance_matrix = np.zeros((self.num_tweets, self.num_tweets))
         # generate upper triangle
         print("Generating distance matrix...")
@@ -108,8 +116,8 @@ class Parser():
         # copy upper triangle to lower triangle
         distance_matrix = distance_matrix + np.transpose(distance_matrix)
 
-        if save:
-            np.save("distance_matrix.npy", distance_matrix)
+        if save_to:
+            np.save(save_to, distance_matrix)
         
         return distance_matrix
 
@@ -130,6 +138,4 @@ def manhattan_distance(x, y):
   return np.sum(x - y)
 
 parser = Parser()
-dm = parser.get_distance_matrix("cnnhealth.txt", euclidean_distance)
-parser.save_vocabulary()
-
+parser.get_bag_of_words("cnnhealth.txt")

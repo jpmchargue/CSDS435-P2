@@ -1,18 +1,16 @@
-from turtle import distance
 from clustering import Clustering
-from sklearn.cluster import AgglomerativeClustering
+from sklearn_extra.cluster import KMedoids
 import numpy as np
 
-class SingleLink(Clustering):
+class KMedoidsClustering(Clustering):
     def __init__(self, num_clusters: int=8):
         self.num_clusters = num_clusters
-        self.model = AgglomerativeClustering(
+        self.model = KMedoids(
             n_clusters=self.num_clusters, 
-            metric="precomputed", 
-            linkage="single"
+            metric="precomputed"
         )
 
     def cluster(self, distance_matrix: np.ndarray) -> np.ndarray:
-        print("Clustering with single link...")
+        print("Clustering with K-Medoids...")
         clustering = self.model.fit(distance_matrix)
         return clustering.labels_
