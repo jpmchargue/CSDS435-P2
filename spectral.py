@@ -10,7 +10,7 @@ class SpecClustering(Clustering):
             n_clusters=self.num_clusters, affinity="precomputed"
         )
 
-    def cluster(self, distance_matrix: np.ndarray) -> np.ndarray:
+    def cluster(self, affinity_matrix: np.ndarray) -> np.ndarray:
         print("Clustering with spectral clustering...")
-        clustering = self.model.fit(np.max(distance_matrix) - distance_matrix)
+        clustering = self.model.fit(affinity_matrix)
         return clustering.labels_
