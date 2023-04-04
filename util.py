@@ -3,6 +3,7 @@ import umap
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 from collections import namedtuple
+import math
 
 
 def plot_umap(bow, labels):
@@ -88,3 +89,35 @@ def evaluate(d_matrix, sim_matrix, clusters) -> Evaluation:
     print("Avg Silhouette:", weighted_avg(ev.silhouette, cluster_idxs))
 
     return ev
+
+
+Comparison = namedtuple("Comparison", "entropy purity")
+
+
+def entropy(p):
+    return 0 if p == 0 else -p * math.log2(p)
+
+
+def compare(cluster1, cluster2) -> Comparison:
+    class_idxs = [np.where(cluster1 == i)[0] for i in np.unique(cluster1)]
+    cluster_idxs = [np.where(cluster2 == i)[0] for i in np.unique(cluster2)]
+    p_s = [
+        [len(np.intersect1d(cla, clu)) / len(clu) for cla in class_idxs]
+        for clu in cluster_idxs
+    ]
+    clu_ents = [sum([entropy(p_ij) for p_ij in row]) for row in p_s]
+    clu_purs = [max(row) for row in p_s]
+
+    comp = Comparison(
+        entropy=sum(
+            [ent * len(cla) / len(cluster1) for cla, ent in zip(class_idxs, clu_ents)]
+        ),
+        purity=sum(
+            [pur * len(cla) / len(cluster1) for cla, pur in zip(class_idxs, clu_purs)]
+        ),
+    )
+
+    print("Entropy:", comp.entropy)
+    print("Purity:", comp.purity)
+
+    return comp
