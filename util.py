@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import umap
 from sklearn.preprocessing import StandardScaler
 import numpy as np
@@ -45,6 +46,45 @@ def plot_cluster_sim(ax, sim_matrix, clusters):
     max_v = np.max(sim_matrix)
     sim_matrix[:] = (sim_matrix - min_v) / (max_v - min_v)
     return ax.imshow(sim_matrix, interpolation="nearest")
+
+
+Clusters = namedtuple("Clusters", "clusters name d_name eval s_matrix")
+
+
+def perform_clustering(model, name, d_name, s_matrix, d_matrix, sim=False) -> Clusters:
+    d_name += " Similarity" if sim else " Distance"
+
+    print(name, "with", d_name)
+
+    clusters = model.cluster(s_matrix if sim else d_matrix)
+    ev = evaluate(d_matrix, s_matrix, clusters)
+
+    unique, counts = np.unique(clusters, return_counts=True)
+    plt.title(f"{name} Cluster Distributions with {d_name}")
+    plt.xlabel("Cluster")
+    plt.ylabel("Size")
+    plt.bar(unique, counts)
+    plt.show()
+
+    return Clusters(
+        clusters=clusters, name=name, d_name=d_name, eval=ev, s_matrix=s_matrix
+    )
+
+
+def perform_comparison(c1: Clusters, c2: Clusters):
+    print("Comparison:")
+
+    plt.figure().set_figwidth(12)
+    axs = [plt.subplot2grid((1, 2), (0, i)) for i in range(2)]
+    for i, c in enumerate([c1, c2]):
+        axs[i].set_title(f"{c.name} with {c.d_name}")
+        im = plot_cluster_sim(axs[i], c.s_matrix, c.clusters)
+        print("Classes =", c.name, "width", c.d_name)
+        comp = compare(c.clusters, [c2, c1][i].clusters)
+        plt.colorbar(
+            im, cax=make_axes_locatable(axs[i]).append_axes("right", size="5%", pad=0.1)
+        )
+    plt.show()
 
 
 Evaluation = namedtuple("Evaluation", "cohesion separation silhouette")
