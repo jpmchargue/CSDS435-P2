@@ -53,6 +53,7 @@ class Parser():
         self.word_to_int = {}
         self.int_to_word = {}
         self.num_tweets = 0
+        self.num_terms_total = 0
         self.num_words = 0
         sentences = []
 
@@ -65,6 +66,7 @@ class Parser():
                 sentences.append(sentence)
                 # Add new words to vocabulary
                 for word in sentence:
+                    self.num_terms_total += 1
                     if word not in self.word_to_int:
                         self.word_to_int[word] = self.num_words
                         self.int_to_word[self.num_words] = word
@@ -86,6 +88,12 @@ class Parser():
 
         if save_to:
             np.save(save_to, vectors)
+
+        print("--- FEATURE MATRIX SUMMARY ---")
+        print(f"Number of documents:    {self.num_tweets}")
+        print(f"Number of term tokens:  {self.num_terms_total}")
+        print(f"Number of unique terms: {self.num_words}")
+        print(f"Avg terms per document: {round(self.num_terms_total/self.num_tweets, 2)}")
 
         return vectors
         
@@ -136,6 +144,3 @@ def euclidean_distance(x, y):
 
 def manhattan_distance(x, y):
   return np.sum(np.abs(x - y))
-
-parser = Parser()
-parser.get_bag_of_words("cnnhealth.txt")
