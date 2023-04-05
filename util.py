@@ -64,6 +64,7 @@ def perform_clustering(model, name, d_name, s_matrix, d_matrix, sim=False) -> Cl
     plt.xlabel("Cluster")
     plt.ylabel("Size")
     plt.bar(unique, counts)
+    plt.xticks(unique)
     plt.show()
 
     return Clusters(
@@ -78,6 +79,8 @@ def perform_comparison(c1: Clusters, c2: Clusters):
     axs = [plt.subplot2grid((1, 2), (0, i)) for i in range(2)]
     for i, c in enumerate([c1, c2]):
         axs[i].set_title(f"{c.name} with {c.d_name}")
+        axs[i].set_xlabel("Points")
+        axs[i].set_ylabel("Points")
         im = plot_cluster_sim(axs[i], c.s_matrix, c.clusters)
         print("Classes =", c.name, "width", c.d_name)
         comp = compare(c.clusters, [c2, c1][i].clusters)

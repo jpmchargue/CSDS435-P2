@@ -4,10 +4,10 @@ import numpy as np
 
 
 class SpecClustering(Clustering):
-    def __init__(self, num_clusters: int = 8):
+    def __init__(self, num_clusters: int = 8, labels="kmeans"):
         self.num_clusters = num_clusters
         self.model = SpectralClustering(
-            n_clusters=self.num_clusters, affinity="precomputed"
+            n_clusters=self.num_clusters, affinity="precomputed", assign_labels=labels
         )
 
     def cluster(self, affinity_matrix: np.ndarray) -> np.ndarray:
